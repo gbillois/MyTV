@@ -2,9 +2,9 @@
   color-scheme: light dark;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --channel-width: 104px;
-  --ruler-height: 42px;
-  --row-height: 76px;
+  --channel-width: 68px;
+  --ruler-height: 36px;
+  --row-height: 58px;
   --surface: #f6f8fb;
   --surface-raised: #ffffff;
   --surface-muted: #e9eef4;
@@ -214,10 +214,10 @@ button { color: inherit; }
   left: 0;
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 6px;
   border-right: 1px solid var(--line);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -236,8 +236,8 @@ button { color: inherit; }
 
 .time-tick span {
   position: absolute;
-  top: 12px;
-  left: 8px;
+  top: 10px;
+  left: 6px;
   color: var(--muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -249,12 +249,11 @@ button { color: inherit; }
 .channel-cell {
   position: sticky;
   left: 0;
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
   min-width: 0;
-  padding: 7px 8px;
+  padding: 4px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background: var(--surface-raised);
@@ -262,32 +261,50 @@ button { color: inherit; }
 }
 
 .channel-number {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  z-index: 2;
 }
 
 .channel-name {
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.05;
+  text-align: center;
+  word-break: break-word;
 }
 
 .channel-logo {
-  grid-column: 2;
   max-width: 54px;
-  max-height: 20px;
+  max-height: 27px;
   object-fit: contain;
-  object-position: left center;
+  object-position: center;
+  pointer-events: none;
 }
+
+.channel-cell.has-logo .channel-name { display: none; }
 
 .programme-row {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   border-bottom: 1px solid var(--line);
   background-color: var(--surface);
   background-image: linear-gradient(to right, var(--line) 1px, transparent 1px);
@@ -299,8 +316,8 @@ button { color: inherit; }
   top: 4px;
   bottom: 4px;
   min-width: 2px;
-  overflow: hidden;
-  padding: 7px 8px;
+  overflow: clip;
+  padding: 0;
   border: 1px solid color-mix(in srgb, var(--program-color) 68%, #000 8%);
   border-radius: 5px;
   background: var(--program-color);
@@ -308,6 +325,16 @@ button { color: inherit; }
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+.programme-content {
+  position: sticky;
+  left: calc(var(--channel-width) + 5px);
+  display: block;
+  width: fit-content;
+  max-width: min(calc(100% - 6px), calc(100vw - var(--channel-width) - 14px));
+  padding: 5px 6px;
+  overflow: hidden;
 }
 
 .programme:active { filter: brightness(.94); }
@@ -322,16 +349,16 @@ button { color: inherit; }
   white-space: nowrap;
 }
 
-.programme-title { font-size: 13px; font-weight: 800; line-height: 1.2; }
-.programme-subtitle { margin-top: 3px; font-size: 12px; line-height: 1.15; opacity: .8; }
-.programme-meta { margin-top: 5px; font-size: 11px; font-variant-numeric: tabular-nums; opacity: .72; }
+.programme-title { font-size: 12px; font-weight: 800; line-height: 1.12; }
+.programme-subtitle { margin-top: 2px; font-size: 11px; line-height: 1.08; opacity: .82; }
+.programme-meta { margin-top: 3px; font-size: 10px; line-height: 1.05; font-variant-numeric: tabular-nums; opacity: .74; }
 .programme.is-medium .programme-subtitle,
 .programme.is-small .programme-subtitle,
 .programme.is-small .programme-meta,
 .programme.is-tiny .programme-subtitle,
 .programme.is-tiny .programme-meta { display: none; }
-.programme.is-tiny { padding: 7px 4px; }
-.programme.is-tiny .programme-title { font-size: 11px; }
+.programme.is-tiny .programme-content { padding-right: 3px; padding-left: 3px; }
+.programme.is-tiny .programme-title { font-size: 10px; }
 .programme.is-past { filter: saturate(.55); opacity: .72; }
 
 .cat-film { --program-color: #e9dff5; }
@@ -554,16 +581,17 @@ button { color: inherit; }
 .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 
 @media (min-width: 700px) {
-  :root { --channel-width: 148px; --row-height: 82px; }
+  :root { --channel-width: 96px; --row-height: 62px; }
   .app-header { padding-right: 18px; padding-left: 18px; }
-  .channel-cell { grid-template-columns: 32px minmax(0, 1fr); padding-right: 12px; padding-left: 12px; }
-  .channel-name { font-size: 14px; }
+  .channel-cell { padding-right: 8px; padding-left: 8px; }
+  .channel-name { font-size: 12px; }
+  .channel-logo { max-width: 70px; max-height: 31px; }
   .bottom-sheet { right: 50%; left: auto; width: min(560px, calc(100% - 32px)); border-radius: 22px 22px 0 0; transform: translate(50%, 100%); }
   .bottom-dialog[open] .bottom-sheet { transform: translate(50%, 0); }
 }
 
 @media (max-height: 560px) and (orientation: landscape) {
-  :root { --row-height: 68px; }
+  :root { --row-height: 54px; }
   .app-header { padding-top: calc(var(--safe-top) + 4px); padding-bottom: 5px; }
   .brand-row { min-height: 30px; }
   .brand-mark { width: 25px; height: 25px; }

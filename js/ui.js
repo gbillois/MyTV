@@ -6,7 +6,7 @@ import {
   parisMidnight
 } from "./epg.js";
 
-export const MINUTE_WIDTH = 4;
+export const MINUTE_WIDTH = 2.25;
 const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: PARIS_TIME_ZONE,
   hour: "2-digit",
@@ -82,9 +82,9 @@ export function resolveChannels(epgProvider, preferences) {
 }
 
 function programmeSizeClass(width) {
-  if (width < 42) return "is-tiny";
-  if (width < 90) return "is-small";
-  if (width < 165) return "is-medium";
+  if (width < 28) return "is-tiny";
+  if (width < 64) return "is-small";
+  if (width < 96) return "is-medium";
   return "is-large";
 }
 
@@ -104,9 +104,11 @@ function createProgrammeButton(programme, windowStart, windowEnd, onSelect) {
     `${programme.title}, de ${formatTime(programme.start)} à ${formatTime(programme.stop)}`
   );
   button.innerHTML = `
-    <span class="programme-title">${escapeHtml(programme.title)}</span>
-    ${programme.subtitle ? `<span class="programme-subtitle">${escapeHtml(programme.subtitle)}</span>` : ""}
-    <span class="programme-meta">${formatTime(programme.start)}–${formatTime(programme.stop)}</span>
+    <span class="programme-content">
+      <span class="programme-title">${escapeHtml(programme.title)}</span>
+      ${programme.subtitle ? `<span class="programme-subtitle">${escapeHtml(programme.subtitle)}</span>` : ""}
+      <span class="programme-meta">${formatTime(programme.start)}–${formatTime(programme.stop)}</span>
+    </span>
   `;
   button.addEventListener("click", () => onSelect(programme));
   return button;
@@ -163,6 +165,7 @@ export function renderGuide({ canvas, epgProvider, channels, selectedDate, onPro
       logo.src = channel.icon;
       logo.alt = "";
       logo.loading = "lazy";
+      logo.addEventListener("load", () => channelCell.classList.add("has-logo"));
       logo.addEventListener("error", () => logo.remove());
       channelCell.append(logo);
     }
