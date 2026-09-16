@@ -9,12 +9,17 @@ import {
 import {
   getCachedEpg,
   loadChannelPreferences,
+  loadTimelineZoom,
   saveChannelPreferences,
+  saveTimelineZoom,
   setCachedEpg
 } from "./storage.js";
 import {
-  MINUTE_WIDTH,
+  DEFAULT_MINUTE_WIDTH,
+  MAX_MINUTE_WIDTH,
+  MIN_MINUTE_WIDTH,
   attachSwipeToClose,
+  clampMinuteWidth,
   populateDateSelector,
   renderChannelSettings,
   renderGuide,
@@ -45,6 +50,10 @@ const elements = {
   settingsButton: document.querySelector("#settingsButton"),
   settingsDialog: document.querySelector("#settingsDialog"),
   channelSettings: document.querySelector("#channelSettings"),
+  zoomRange: document.querySelector("#zoomRange"),
+  zoomValue: document.querySelector("#zoomValue"),
+  zoomOutButton: document.querySelector("#zoomOutButton"),
+  zoomInButton: document.querySelector("#zoomInButton"),
   restoreChannelsButton: document.querySelector("#restoreChannelsButton"),
   toast: document.querySelector("#toast")
 };
@@ -56,6 +65,9 @@ const state = {
   preferences: loadChannelPreferences(DEFAULT_CHANNELS.map(channel => channel.id)),
   source: DATA_SOURCE,
   fetchedAt: 0,
+  minuteWidth: clampMinuteWidth(loadTimelineZoom(DEFAULT_MINUTE_WIDTH)),
+  windowStart: 0,
+  windowEnd: 0,
   toastTimer: null
 };
 
@@ -99,25 +111,35 @@ function setActiveNav(active) {
 }
 
 function render({ preserveScroll = false } = {}) {
-  const previousLeft = elements.scroller.scrollLeft;
+  const previousTimestamp = state.windowStart
+    ? state.windowStart + (elements.scroller.scrollLeft / state.minuteWidth) * 60_000
+    : null;
   const previousTop = elements.scroller.scrollTop;
   const channels = resolveChannels(state.provider, state.preferences);
 
   populateDateSelector(elements.dateSelect, state.dateKeys, state.selectedDate);
-  renderGuide({
+  const layout = renderGuide({
     canvas: elements.canvas,
     epgProvider: state.provider,
     channels,
+    dateKeys: state.dateKeys,
     selectedDate: state.selectedDate,
+    minuteWidth: state.minuteWidth,
     onProgrammeSelect: programme => showProgrammeDetails(elements.programmeDialog, programme)
   });
+  state.windowStart = layout.windowStart;
+  state.windowEnd = layout.windowEnd;
 
   if (preserveScroll) {
-    requestAnimationFrame(() => {
-      elements.scroller.scrollLeft = previousLeft;
-      elements.scroller.scrollTop = previousTop;
-    });
+    if (previousTimestamp !== null) {
+      elements.scroller.scrollLeft = Math.max(
+        0,
+        ((previousTimestamp - state.windowStart) / 60_000) * state.minuteWidth
+      );
+    }
+    elements.scroller.scrollTop = previousTop;
   }
+  updateZoomControls();
   updateStatus();
   elements.loading.classList.add("is-hidden");
 }
@@ -201,13 +223,15 @@ function selectDate(key) {
     return false;
   }
   state.selectedDate = key;
-  render();
+  elements.dateSelect.value = key;
   return true;
 }
 
 function scrollToTime(timestamp, smooth = true, leadMinutes = 45) {
-  const windowStart = parisMidnight(state.selectedDate);
-  const left = Math.max(0, ((timestamp - windowStart) / 60_000 - leadMinutes) * MINUTE_WIDTH);
+  const left = Math.max(
+    0,
+    ((timestamp - state.windowStart) / 60_000 - leadMinutes) * state.minuteWidth
+  );
   elements.scroller.scrollTo({ left, behavior: smooth ? "smooth" : "auto" });
 }
 
@@ -232,11 +256,149 @@ function handlePreferenceChange(reorder = false) {
 
 function renderSettingsPanel() {
   renderChannelSettings(elements.channelSettings, state.preferences, handlePreferenceChange);
+  updateZoomControls();
 }
 
 function openSettings() {
   renderSettingsPanel();
   elements.settingsDialog.showModal();
+}
+
+function getChannelWidth() {
+  return Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--channel-width")) || 0;
+}
+
+function timelineTimestampAt(viewportX) {
+  const localX = elements.scroller.scrollLeft + viewportX - getChannelWidth();
+  const timestamp = state.windowStart + (localX / state.minuteWidth) * 60_000;
+  return Math.min(state.windowEnd, Math.max(state.windowStart, timestamp));
+}
+
+function zoomPercent(width = state.minuteWidth) {
+  return Math.round((width / DEFAULT_MINUTE_WIDTH) * 100);
+}
+
+function updateZoomControls(width = state.minuteWidth) {
+  if (!elements.zoomRange) return;
+  elements.zoomRange.value = String(width);
+  elements.zoomValue.value = `${zoomPercent(width)} %`;
+  elements.zoomValue.textContent = `${zoomPercent(width)} %`;
+  elements.zoomOutButton.disabled = width <= MIN_MINUTE_WIDTH + 0.01;
+  elements.zoomInButton.disabled = width >= MAX_MINUTE_WIDTH - 0.01;
+}
+
+function viewportCenterX() {
+  const channelWidth = getChannelWidth();
+  return channelWidth + Math.max(0, elements.scroller.clientWidth - channelWidth) / 2;
+}
+
+function clearPinchPreview() {
+  elements.canvas.classList.remove("is-pinching");
+  elements.canvas.style.removeProperty("--pinch-origin");
+  elements.canvas.style.removeProperty("--pinch-scale");
+}
+
+function commitZoom(nextWidth, anchorTimestamp, anchorViewportX, announce = false) {
+  const width = clampMinuteWidth(nextWidth);
+  clearPinchPreview();
+  if (Math.abs(width - state.minuteWidth) < 0.01) {
+    updateZoomControls();
+    return;
+  }
+
+  const top = elements.scroller.scrollTop;
+  state.minuteWidth = width;
+  saveTimelineZoom(width);
+  render();
+
+  const anchorMinutes = (anchorTimestamp - state.windowStart) / 60_000;
+  elements.scroller.scrollLeft = Math.max(
+    0,
+    getChannelWidth() + anchorMinutes * state.minuteWidth - anchorViewportX
+  );
+  elements.scroller.scrollTop = top;
+  syncDateWithScroll();
+  if (announce) showToast(`Zoom ${zoomPercent()} %`);
+}
+
+function zoomAroundCenter(nextWidth) {
+  const anchorViewportX = viewportCenterX();
+  commitZoom(nextWidth, timelineTimestampAt(anchorViewportX), anchorViewportX);
+}
+
+function syncDateWithScroll() {
+  if (!state.windowStart || !state.dateKeys.length) return;
+  const timestamp = timelineTimestampAt(getChannelWidth() + 2);
+  const key = dateKey(Math.min(timestamp, state.windowEnd - 1));
+  if (!state.dateKeys.includes(key) || key === state.selectedDate) return;
+  state.selectedDate = key;
+  elements.dateSelect.value = key;
+}
+
+const pinch = {
+  active: false,
+  startDistance: 0,
+  startWidth: DEFAULT_MINUTE_WIDTH,
+  targetWidth: DEFAULT_MINUTE_WIDTH,
+  anchorTimestamp: 0,
+  anchorViewportX: 0,
+  suppressClickUntil: 0
+};
+
+const edgeSwipe = {
+  startX: null,
+  atStart: false,
+  atEnd: false
+};
+
+function touchDistance(touches) {
+  return Math.hypot(
+    touches[0].clientX - touches[1].clientX,
+    touches[0].clientY - touches[1].clientY
+  );
+}
+
+function beginPinch(event) {
+  if (event.touches.length !== 2 || !state.windowStart) return;
+  const rect = elements.scroller.getBoundingClientRect();
+  const centerX = (event.touches[0].clientX + event.touches[1].clientX) / 2 - rect.left;
+  if (centerX <= getChannelWidth()) return;
+  const distance = touchDistance(event.touches);
+  if (!distance) return;
+
+  pinch.active = true;
+  pinch.startDistance = distance;
+  pinch.startWidth = state.minuteWidth;
+  pinch.targetWidth = state.minuteWidth;
+  pinch.anchorViewportX = centerX;
+  pinch.anchorTimestamp = timelineTimestampAt(centerX);
+  const origin = Math.max(0, elements.scroller.scrollLeft + centerX - getChannelWidth());
+  elements.canvas.style.setProperty("--pinch-origin", `${origin}px`);
+  elements.canvas.style.setProperty("--pinch-scale", "1");
+  elements.canvas.classList.add("is-pinching");
+  event.preventDefault();
+}
+
+function movePinch(event) {
+  if (!pinch.active || event.touches.length < 2) return;
+  pinch.targetWidth = clampMinuteWidth(
+    pinch.startWidth * (touchDistance(event.touches) / pinch.startDistance)
+  );
+  elements.canvas.style.setProperty("--pinch-scale", String(pinch.targetWidth / pinch.startWidth));
+  updateZoomControls(pinch.targetWidth);
+  event.preventDefault();
+}
+
+function endPinch(event) {
+  if (!pinch.active || event.touches.length >= 2) return;
+  pinch.active = false;
+  pinch.suppressClickUntil = performance.now() + 450;
+  commitZoom(
+    pinch.targetWidth,
+    pinch.anchorTimestamp,
+    pinch.anchorViewportX,
+    Math.abs(pinch.targetWidth - pinch.startWidth) >= 0.05
+  );
 }
 
 elements.nowButton.addEventListener("click", () => goToNow());
@@ -253,6 +415,64 @@ elements.dateSelect.addEventListener("change", event => {
   if (!selectDate(event.currentTarget.value)) return;
   setActiveNav(null);
   scrollToTime(parisWallTime(state.selectedDate, 18, 0), false, 30);
+});
+
+let scrollFrame = 0;
+elements.scroller.addEventListener("scroll", () => {
+  if (scrollFrame) return;
+  scrollFrame = requestAnimationFrame(() => {
+    scrollFrame = 0;
+    syncDateWithScroll();
+  });
+}, { passive: true });
+
+elements.scroller.addEventListener("touchstart", event => {
+  setActiveNav(null);
+  if (event.touches.length === 1) {
+    const maxScroll = elements.scroller.scrollWidth - elements.scroller.clientWidth;
+    edgeSwipe.startX = event.touches[0].clientX;
+    edgeSwipe.atStart = elements.scroller.scrollLeft <= 2;
+    edgeSwipe.atEnd = elements.scroller.scrollLeft >= maxScroll - 2;
+  } else if (event.touches.length === 2) {
+    edgeSwipe.startX = null;
+    beginPinch(event);
+  }
+}, { passive: false });
+elements.scroller.addEventListener("touchmove", movePinch, { passive: false });
+elements.scroller.addEventListener("touchend", event => {
+  endPinch(event);
+  if (event.touches.length || edgeSwipe.startX === null || !event.changedTouches.length) return;
+  const deltaX = event.changedTouches[0].clientX - edgeSwipe.startX;
+  if (edgeSwipe.atEnd && deltaX < -70) showToast("Fin des programmes disponibles");
+  if (edgeSwipe.atStart && deltaX > 70) showToast("Début des programmes disponibles");
+  edgeSwipe.startX = null;
+}, { passive: false });
+elements.scroller.addEventListener("touchcancel", event => {
+  edgeSwipe.startX = null;
+  endPinch(event);
+}, { passive: false });
+// Safari émet aussi GestureEvent pendant un pincement. Le calcul reste fondé
+// sur TouchEvent, mais bloquer ce geste natif évite de zoomer toute la page.
+["gesturestart", "gesturechange", "gestureend"].forEach(type => {
+  elements.scroller.addEventListener(type, event => event.preventDefault(), { passive: false });
+});
+elements.scroller.addEventListener("click", event => {
+  if (performance.now() >= pinch.suppressClickUntil) return;
+  event.preventDefault();
+  event.stopPropagation();
+}, true);
+
+elements.zoomRange.addEventListener("input", event => {
+  updateZoomControls(clampMinuteWidth(event.currentTarget.value));
+});
+elements.zoomRange.addEventListener("change", event => {
+  zoomAroundCenter(event.currentTarget.value);
+});
+elements.zoomOutButton.addEventListener("click", () => {
+  zoomAroundCenter(Math.round((state.minuteWidth / 1.35) * 4) / 4);
+});
+elements.zoomInButton.addEventListener("click", () => {
+  zoomAroundCenter(Math.round((state.minuteWidth * 1.35) * 4) / 4);
 });
 
 elements.settingsButton.addEventListener("click", openSettings);
@@ -276,7 +496,9 @@ document.querySelectorAll("[data-close-settings]").forEach(button => {
 
 attachSwipeToClose(elements.programmeDialog, elements.programmeSheet);
 
-setInterval(() => updateNowLine(elements.canvas, state.selectedDate), 60_000);
+setInterval(() => {
+  updateNowLine(elements.canvas, state.windowStart, state.windowEnd, state.minuteWidth);
+}, 60_000);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

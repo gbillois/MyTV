@@ -6,7 +6,9 @@ import {
   parisMidnight
 } from "./epg.js";
 
-export const MINUTE_WIDTH = 2.25;
+export const DEFAULT_MINUTE_WIDTH = 2.25;
+export const MIN_MINUTE_WIDTH = 1.5;
+export const MAX_MINUTE_WIDTH = 12;
 const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
   timeZone: PARIS_TIME_ZONE,
   hour: "2-digit",
@@ -88,11 +90,17 @@ function programmeSizeClass(width) {
   return "is-large";
 }
 
-function createProgrammeButton(programme, windowStart, windowEnd, onSelect) {
+export function clampMinuteWidth(value) {
+  const width = Number(value);
+  if (!Number.isFinite(width)) return DEFAULT_MINUTE_WIDTH;
+  return Math.min(MAX_MINUTE_WIDTH, Math.max(MIN_MINUTE_WIDTH, width));
+}
+
+function createProgrammeButton(programme, windowStart, windowEnd, minuteWidth, onSelect) {
   const clippedStart = Math.max(programme.start, windowStart);
   const clippedStop = Math.min(programme.stop, windowEnd);
-  const left = ((clippedStart - windowStart) / 60_000) * MINUTE_WIDTH;
-  const width = Math.max(2, ((clippedStop - clippedStart) / 60_000) * MINUTE_WIDTH);
+  const left = ((clippedStart - windowStart) / 60_000) * minuteWidth;
+  const width = Math.max(2, ((clippedStop - clippedStart) / 60_000) * minuteWidth);
   const button = document.createElement("button");
   button.type = "button";
   button.className = `programme cat-${programme.category} ${programmeSizeClass(width)}`;
@@ -114,15 +122,25 @@ function createProgrammeButton(programme, windowStart, windowEnd, onSelect) {
   return button;
 }
 
-export function renderGuide({ canvas, epgProvider, channels, selectedDate, onProgrammeSelect }) {
-  const windowStart = parisMidnight(selectedDate);
-  const windowEnd = nextParisMidnight(selectedDate);
+export function renderGuide({
+  canvas,
+  epgProvider,
+  channels,
+  dateKeys,
+  selectedDate,
+  minuteWidth,
+  onProgrammeSelect
+}) {
+  const firstDate = dateKeys[0] || selectedDate;
+  const lastDate = dateKeys.at(-1) || selectedDate;
+  const windowStart = parisMidnight(firstDate);
+  const windowEnd = nextParisMidnight(lastDate);
   const durationMinutes = (windowEnd - windowStart) / 60_000;
-  const timelineWidth = durationMinutes * MINUTE_WIDTH;
+  const timelineWidth = durationMinutes * minuteWidth;
   const fragment = document.createDocumentFragment();
 
   canvas.style.setProperty("--timeline-width", `${timelineWidth}px`);
-  canvas.style.setProperty("--minute-width", `${MINUTE_WIDTH}px`);
+  canvas.style.setProperty("--minute-width", `${minuteWidth}px`);
   canvas.style.setProperty("--channel-count", channels.length);
   canvas.replaceChildren();
 
@@ -142,12 +160,25 @@ export function renderGuide({ canvas, epgProvider, channels, selectedDate, onPro
     const tickElement = document.createElement("div");
     const minutes = (tick - windowStart) / 60_000;
     const formatted = formatTime(tick);
-    tickElement.className = `time-tick${formatted.endsWith(":00") ? " is-hour" : ""}`;
-    tickElement.style.left = `${minutes * MINUTE_WIDTH}px`;
-    tickElement.innerHTML = `<span>${formatted}</span>`;
+    const tickDate = dateKey(tick);
+    const isDayStart = formatted === "00:00";
+    tickElement.className = `time-tick${formatted.endsWith(":00") ? " is-hour" : ""}${isDayStart ? " is-day-start" : ""}`;
+    tickElement.style.left = `${minutes * minuteWidth}px`;
+    tickElement.innerHTML = isDayStart
+      ? `<span class="day-label">${escapeHtml(formatDateLabel(tickDate, dateKey(Date.now())))}</span><span class="tick-label">00:00</span>`
+      : `<span class="tick-label">${formatted}</span>`;
     ruler.append(tickElement);
   }
   fragment.append(ruler);
+
+  dateKeys.slice(1).forEach(key => {
+    const divider = document.createElement("div");
+    const minutes = (parisMidnight(key) - windowStart) / 60_000;
+    divider.className = "day-divider";
+    divider.style.left = `calc(var(--channel-width) + ${minutes * minuteWidth}px)`;
+    divider.setAttribute("aria-hidden", "true");
+    fragment.append(divider);
+  });
 
   channels.forEach((channel, channelIndex) => {
     const gridRow = channelIndex + 2;
@@ -162,11 +193,11 @@ export function renderGuide({ canvas, epgProvider, channels, selectedDate, onPro
     if (channel.icon) {
       const logo = document.createElement("img");
       logo.className = "channel-logo";
-      logo.src = channel.icon;
       logo.alt = "";
       logo.loading = "lazy";
       logo.addEventListener("load", () => channelCell.classList.add("has-logo"));
       logo.addEventListener("error", () => logo.remove());
+      logo.src = channel.icon;
       channelCell.append(logo);
     }
 
@@ -180,7 +211,7 @@ export function renderGuide({ canvas, epgProvider, channels, selectedDate, onPro
     if (programmes.length) {
       programmes.forEach(programme => {
         programme.channelDisplayName = channel.name;
-        programmeRow.append(createProgrammeButton(programme, windowStart, windowEnd, onProgrammeSelect));
+        programmeRow.append(createProgrammeButton(programme, windowStart, windowEnd, minuteWidth, onProgrammeSelect));
       });
     } else {
       const empty = document.createElement("span");
@@ -192,11 +223,12 @@ export function renderGuide({ canvas, epgProvider, channels, selectedDate, onPro
     fragment.append(channelCell, programmeRow);
   });
 
-  if (selectedDate === dateKey(Date.now())) {
+  const now = Date.now();
+  if (now >= windowStart && now < windowEnd) {
     const line = document.createElement("div");
     line.className = "now-line";
     line.id = "nowLine";
-    const left = (Date.now() - windowStart) / 60_000 * MINUTE_WIDTH;
+    const left = (now - windowStart) / 60_000 * minuteWidth;
     line.style.left = `calc(var(--channel-width) + ${left}px)`;
     fragment.append(line);
   }
@@ -205,10 +237,11 @@ export function renderGuide({ canvas, epgProvider, channels, selectedDate, onPro
   return { windowStart, windowEnd, timelineWidth };
 }
 
-export function updateNowLine(canvas, selectedDate) {
+export function updateNowLine(canvas, windowStart, windowEnd, minuteWidth) {
   const line = canvas.querySelector("#nowLine");
-  if (!line || selectedDate !== dateKey(Date.now())) return;
-  const left = (Date.now() - parisMidnight(selectedDate)) / 60_000 * MINUTE_WIDTH;
+  const now = Date.now();
+  if (!line || now < windowStart || now >= windowEnd) return;
+  const left = (now - windowStart) / 60_000 * minuteWidth;
   line.style.left = `calc(var(--channel-width) + ${left}px)`;
 }
 

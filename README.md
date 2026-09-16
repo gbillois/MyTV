@@ -37,7 +37,7 @@ L’Action s’exécute toutes les huit heures et peut aussi être lancée manue
 - Un cache encore frais évite tout téléchargement réseau.
 - Si le rafraîchissement échoue, la dernière grille IndexedDB reste affichée.
 - Le service worker met en cache l’interface et conserve aussi la dernière réponse XMLTV.
-- Les préférences de chaînes sont enregistrées dans `localStorage`.
+- Les préférences de chaînes et le niveau de zoom sont enregistrés dans `localStorage`.
 
 L’abstraction `EpgProvider` dans `js/epg.js` expose `fetch()`, `parse()`, `getChannels()` et `getPrograms(channelId, start, end)`. La recherche de programmes utilise une recherche binaire dans des listes triées.
 
@@ -56,6 +56,8 @@ Le manifeste utilise des chemins relatifs : l’application fonctionne aussi bie
 ## PWA iPhone
 
 Dans Safari, ouvrez le site puis choisissez **Partager → Sur l’écran d’accueil**. L’application s’ouvre en mode autonome, respecte les zones sûres de l’iPhone, le mode sombre et le mode économie de mouvement.
+
+La chronologie couvre sans coupure tous les jours présents dans le guide : continuez simplement à faire défiler vers la droite pour passer minuit et atteindre le lendemain. Le sélecteur de date se met à jour automatiquement. Un geste à deux doigts agrandit ou réduit les créneaux autour de l’heure située entre les doigts ; le même réglage reste accessible dans **Mes chaînes → Zoom de la grille**.
 
 ## Structure
 

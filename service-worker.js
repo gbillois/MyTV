@@ -1,4 +1,4 @@
-const CACHE_NAME = "mytv-shell-v2";
+const CACHE_NAME = "mytv-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",

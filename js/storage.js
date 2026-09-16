@@ -2,6 +2,7 @@ const DB_NAME = "mytv-epg";
 const DB_VERSION = 1;
 const STORE_NAME = "cache";
 const PREFS_KEY = "mytv-channel-preferences-v1";
+const TIMELINE_ZOOM_KEY = "mytv-timeline-zoom-v1";
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
@@ -82,4 +83,21 @@ export function loadChannelPreferences(defaultOrder) {
 
 export function saveChannelPreferences(preferences) {
   localStorage.setItem(PREFS_KEY, JSON.stringify(preferences));
+}
+
+export function loadTimelineZoom(fallback) {
+  try {
+    const stored = Number.parseFloat(localStorage.getItem(TIMELINE_ZOOM_KEY));
+    return Number.isFinite(stored) ? stored : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function saveTimelineZoom(minuteWidth) {
+  try {
+    localStorage.setItem(TIMELINE_ZOOM_KEY, String(minuteWidth));
+  } catch {
+    // Le zoom reste fonctionnel pour la session si le stockage est bloqué.
+  }
 }
