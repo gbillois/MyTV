@@ -1,0 +1,55 @@
+name: Mettre à jour le guide TV
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */8 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-epg
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer MyTV
+        uses: actions/checkout@v4
+
+      - name: Récupérer IPTV-org EPG
+        uses: actions/checkout@v4
+        with:
+          repository: iptv-org/epg
+          path: .epg-upstream
+          fetch-depth: 1
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: .epg-upstream/package-lock.json
+
+      - name: Installer l’outil IPTV-org
+        working-directory: .epg-upstream
+        run: npm ci
+
+      - name: Générer trois jours de guide français
+        working-directory: .epg-upstream
+        run: npm run grab -- --channels="${{ github.workspace }}/config/channels.xml" --output="${{ github.workspace }}/data/epg.xml" --days=3 --maxConnections=5
+
+      - name: Valider le XMLTV
+        run: |
+          test -s data/epg.xml
+          grep -q '<programme ' data/epg.xml
+
+      - name: Publier la nouvelle donnée
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/epg.xml
+          git diff --cached --quiet || git commit -m "data: actualise le guide TV"
+          git push

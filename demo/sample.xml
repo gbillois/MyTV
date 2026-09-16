@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tv generator-info-name="MyTV demo fixture">
+  <channel id="TF1.fr@SD"><display-name lang="fr">TF1</display-name></channel>
+  <channel id="France2.fr@SD"><display-name lang="fr">France 2</display-name></channel>
+  <channel id="France3.fr@SD"><display-name lang="fr">France 3</display-name></channel>
+  <channel id="France4.fr@SD"><display-name lang="fr">France 4</display-name></channel>
+  <channel id="France5.fr@SD"><display-name lang="fr">France 5</display-name></channel>
+  <channel id="M6.fr@HD"><display-name lang="fr">M6</display-name></channel>
+  <channel id="arte.fr@SD"><display-name lang="fr">Arte</display-name></channel>
+  <channel id="LCP.fr@SD"><display-name lang="fr">LCP</display-name></channel>
+  <channel id="W9.fr@SD"><display-name lang="fr">W9</display-name></channel>
+  <channel id="TMC.fr@SD"><display-name lang="fr">TMC</display-name></channel>
+  <channel id="TFX.fr@SD"><display-name lang="fr">TFX</display-name></channel>
+  <channel id="Gulli.fr@SD"><display-name lang="fr">Gulli</display-name></channel>
+  <channel id="BFMTV.fr@SD"><display-name lang="fr">BFM TV</display-name></channel>
+  <channel id="CNews.fr@SD"><display-name lang="fr">CNews</display-name></channel>
+  <channel id="LCI.fr@SD"><display-name lang="fr">LCI</display-name></channel>
+  <channel id="Franceinfo.fr@SD"><display-name lang="fr">franceinfo</display-name></channel>
+  <channel id="CStar.fr@SD"><display-name lang="fr">CSTAR</display-name></channel>
+  <channel id="T18.fr@SD"><display-name lang="fr">T18</display-name></channel>
+  <channel id="NOVO19.fr@SD"><display-name lang="fr">NOVO19</display-name></channel>
+
+  <programme start="20260916180000 +0200" stop="20260916190000 +0200" channel="TF1.fr@SD"><title lang="fr">Le grand jeu</title><category lang="fr">Divertissement</category></programme>
+  <programme start="20260916190000 +0200" stop="20260916195500 +0200" channel="TF1.fr@SD"><title lang="fr">Journal</title><sub-title lang="fr">Édition du soir</sub-title><desc lang="fr">L’actualité nationale et internationale.</desc><category lang="fr">Information</category></programme>
+  <programme start="20260916195500 +0200" stop="20260916210500 +0200" channel="TF1.fr@SD"><title lang="fr">Enquête à Paris</title><sub-title lang="fr">Le dernier indice</sub-title><category lang="fr">Série</category><episode-num system="onscreen">S02E04</episode-num></programme>
+  <programme start="20260916210500 +0200" stop="20260916231500 +0200" channel="TF1.fr@SD"><title lang="fr">Le passage</title><desc lang="fr">Un film d’aventure au cœur des Alpes.</desc><category lang="fr">Film</category><rating><value>Tout public</value></rating></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916183500 +0200" channel="France2.fr@SD"><title lang="fr">Questions pour demain</title><category lang="fr">Jeu</category></programme>
+  <programme start="20260916183500 +0200" stop="20260916193000 +0200" channel="France2.fr@SD"><title lang="fr">N’oubliez pas les paroles</title><category lang="fr">Divertissement</category></programme>
+  <programme start="20260916193000 +0200" stop="20260916200000 +0200" channel="France2.fr@SD"><title lang="fr">Journal 20h</title><category lang="fr">Journal</category></programme>
+  <programme start="20260916200000 +0200" stop="20260916204500 +0200" channel="France2.fr@SD"><title lang="fr">Un si grand soleil</title><category lang="fr">Série</category></programme>
+  <programme start="20260916204500 +0200" stop="20260916225000 +0200" channel="France2.fr@SD"><title lang="fr">La grande soirée</title><category lang="fr">Divertissement</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916185000 +0200" channel="France3.fr@SD"><title lang="fr">Le 18:30</title><category lang="fr">Information</category></programme>
+  <programme start="20260916185000 +0200" stop="20260916191000 +0200" channel="France3.fr@SD"><title lang="fr">Météo régionale</title><category lang="fr">Météo</category></programme>
+  <programme start="20260916191000 +0200" stop="20260916200500 +0200" channel="France3.fr@SD"><title lang="fr">Ici 19/20</title><category lang="fr">Journal</category></programme>
+  <programme start="20260916200500 +0200" stop="20260916211000 +0200" channel="France3.fr@SD"><title lang="fr">Des racines et des ailes</title><category lang="fr">Documentaire</category></programme>
+  <programme start="20260916211000 +0200" stop="20260916225500 +0200" channel="France3.fr@SD"><title lang="fr">Meurtres en pays d’Auge</title><category lang="fr">Téléfilm</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916184500 +0200" channel="France4.fr@SD"><title lang="fr">Okoo</title><category lang="fr">Jeunesse</category></programme>
+  <programme start="20260916184500 +0200" stop="20260916193000 +0200" channel="France4.fr@SD"><title lang="fr">Les as de la jungle</title><category lang="fr">Animation</category></programme>
+  <programme start="20260916193000 +0200" stop="20260916210000 +0200" channel="France4.fr@SD"><title lang="fr">Culturebox, le show</title><category lang="fr">Musique</category></programme>
+  <programme start="20260916210000 +0200" stop="20260916223000 +0200" channel="France4.fr@SD"><title lang="fr">Théâtre en direct</title><category lang="fr">Spectacle</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916185500 +0200" channel="France5.fr@SD"><title lang="fr">C dans l’air</title><category lang="fr">Magazine</category></programme>
+  <programme start="20260916185500 +0200" stop="20260916194000 +0200" channel="France5.fr@SD"><title lang="fr">C à vous</title><category lang="fr">Talk-show</category></programme>
+  <programme start="20260916194000 +0200" stop="20260916203000 +0200" channel="France5.fr@SD"><title lang="fr">Le monde en face</title><category lang="fr">Documentaire</category></programme>
+  <programme start="20260916203000 +0200" stop="20260916220000 +0200" channel="France5.fr@SD"><title lang="fr">Planète bleue</title><sub-title lang="fr">Océans fragiles</sub-title><category lang="fr">Documentaire</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916184000 +0200" channel="M6.fr@HD"><title lang="fr">La meilleure cuisine</title><category lang="fr">Divertissement</category></programme>
+  <programme start="20260916184000 +0200" stop="20260916194500 +0200" channel="M6.fr@HD"><title lang="fr">Scènes de ménages</title><category lang="fr">Série</category></programme>
+  <programme start="20260916194500 +0200" stop="20260916205500 +0200" channel="M6.fr@HD"><title lang="fr">Le 19:45</title><category lang="fr">Journal</category></programme>
+  <programme start="20260916205500 +0200" stop="20260916231500 +0200" channel="M6.fr@HD"><title lang="fr">Top chef</title><category lang="fr">Divertissement</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916183500 +0200" channel="arte.fr@SD"><title lang="fr">Invitation au voyage</title><category lang="fr">Documentaire</category></programme>
+  <programme start="20260916183500 +0200" stop="20260916192000 +0200" channel="arte.fr@SD"><title lang="fr">Arte Journal</title><category lang="fr">Information</category></programme>
+  <programme start="20260916192000 +0200" stop="20260916205500 +0200" channel="arte.fr@SD"><title lang="fr">Le dessous des cartes</title><category lang="fr">Documentaire</category></programme>
+  <programme start="20260916205500 +0200" stop="20260916224500 +0200" channel="arte.fr@SD"><title lang="fr">Une vie ailleurs</title><category lang="fr">Film</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916190000 +0200" channel="LCP.fr@SD"><title lang="fr">Questions au gouvernement</title><category lang="fr">Politique</category></programme>
+  <programme start="20260916190000 +0200" stop="20260916200000 +0200" channel="LCP.fr@SD"><title lang="fr">Ça vous regarde</title><category lang="fr">Magazine</category></programme>
+  <programme start="20260916200000 +0200" stop="20260916220000 +0200" channel="LCP.fr@SD"><title lang="fr">DébatDoc</title><category lang="fr">Documentaire</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916190000 +0200" channel="W9.fr@SD"><title lang="fr">Un dîner presque parfait</title><category lang="fr">Divertissement</category></programme>
+  <programme start="20260916190000 +0200" stop="20260916210000 +0200" channel="W9.fr@SD"><title lang="fr">Enquête d’action</title><category lang="fr">Magazine</category></programme>
+  <programme start="20260916210000 +0200" stop="20260916230000 +0200" channel="W9.fr@SD"><title lang="fr">Mission spéciale</title><category lang="fr">Film</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916193000 +0200" channel="TMC.fr@SD"><title lang="fr">Quotidien</title><category lang="fr">Divertissement</category></programme>
+  <programme start="20260916193000 +0200" stop="20260916210000 +0200" channel="TMC.fr@SD"><title lang="fr">Nos chers voisins</title><category lang="fr">Série</category></programme>
+  <programme start="20260916210000 +0200" stop="20260916231500 +0200" channel="TMC.fr@SD"><title lang="fr">Blockbuster</title><category lang="fr">Film</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916191500 +0200" channel="TFX.fr@SD"><title lang="fr">Familles nombreuses</title><category lang="fr">Divertissement</category></programme>
+  <programme start="20260916191500 +0200" stop="20260916204500 +0200" channel="TFX.fr@SD"><title lang="fr">Chroniques criminelles</title><category lang="fr">Magazine</category></programme>
+  <programme start="20260916204500 +0200" stop="20260916225500 +0200" channel="TFX.fr@SD"><title lang="fr">Action totale</title><category lang="fr">Film</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916183000 +0200" channel="Gulli.fr@SD"><title lang="fr">Les aventures de Moka</title><category lang="fr">Animation</category></programme>
+  <programme start="20260916183000 +0200" stop="20260916193000 +0200" channel="Gulli.fr@SD"><title lang="fr">Bienvenue chez les Loud</title><category lang="fr">Jeunesse</category></programme>
+  <programme start="20260916193000 +0200" stop="20260916211500 +0200" channel="Gulli.fr@SD"><title lang="fr">Le grand voyage</title><category lang="fr">Film jeunesse</category></programme>
+  <programme start="20260916211500 +0200" stop="20260916223000 +0200" channel="Gulli.fr@SD"><title lang="fr">E-sport club</title><category lang="fr">Jeunesse</category></programme>
+
+  <programme start="20260916180000 +0200" stop="20260916230000 +0200" channel="BFMTV.fr@SD"><title lang="fr">BFM Story</title><category lang="fr">Information</category></programme>
+  <programme start="20260916180000 +0200" stop="20260916230000 +0200" channel="CNews.fr@SD"><title lang="fr">L’heure des pros</title><category lang="fr">Information</category></programme>
+  <programme start="20260916180000 +0200" stop="20260916230000 +0200" channel="LCI.fr@SD"><title lang="fr">24h Pujadas</title><category lang="fr">Information</category></programme>
+  <programme start="20260916180000 +0200" stop="20260916230000 +0200" channel="Franceinfo.fr@SD"><title lang="fr">Le fil info</title><category lang="fr">Information</category></programme>
+  <programme start="20260916180000 +0200" stop="20260916193000 +0200" channel="CStar.fr@SD"><title lang="fr">Top albums</title><category lang="fr">Musique</category></programme>
+  <programme start="20260916193000 +0200" stop="20260916220000 +0200" channel="CStar.fr@SD"><title lang="fr">Chicago Fire</title><category lang="fr">Série</category></programme>
+  <programme start="20260916180000 +0200" stop="20260916200000 +0200" channel="T18.fr@SD"><title lang="fr">T18 en direct</title><category lang="fr">Magazine</category></programme>
+  <programme start="20260916200000 +0200" stop="20260916223000 +0200" channel="T18.fr@SD"><title lang="fr">La soirée documentaire</title><category lang="fr">Documentaire</category></programme>
+  <programme start="20260916180000 +0200" stop="20260916194500 +0200" channel="NOVO19.fr@SD"><title lang="fr">NOVO19, le mag</title><category lang="fr">Magazine</category></programme>
+  <programme start="20260916194500 +0200" stop="20260916221500 +0200" channel="NOVO19.fr@SD"><title lang="fr">Cinéma 19</title><category lang="fr">Film</category></programme>
+</tv>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<channels>
+  <channel site="programme-tv.net" site_id="tf1-19" lang="fr" xmltv_id="TF1.fr@SD">TF1</channel>
+  <channel site="programme-tv.net" site_id="france-2-6" lang="fr" xmltv_id="France2.fr@SD">France 2</channel>
+  <channel site="programme-tv.net" site_id="france-3-7" lang="fr" xmltv_id="France3.fr@SD">France 3</channel>
+  <channel site="programme-tv.net" site_id="france-4-8" lang="fr" xmltv_id="France4.fr@SD">France 4</channel>
+  <channel site="programme-tv.net" site_id="france-5-9" lang="fr" xmltv_id="France5.fr@SD">France 5</channel>
+  <channel site="programme-tv.net" site_id="m6-12" lang="fr" xmltv_id="M6.fr@HD">M6</channel>
+  <channel site="programme-tv.net" site_id="arte-337" lang="fr" xmltv_id="arte.fr@SD">Arte</channel>
+  <channel site="programme-tv.net" site_id="la-chaine-parlementaire-11" lang="fr" xmltv_id="LCP.fr@SD">LCP</channel>
+  <channel site="programme-tv.net" site_id="w9-24" lang="fr" xmltv_id="W9.fr@SD">W9</channel>
+  <channel site="programme-tv.net" site_id="tmc-21" lang="fr" xmltv_id="TMC.fr@SD">TMC</channel>
+  <channel site="programme-tv.net" site_id="tfx-14" lang="fr" xmltv_id="TFX.fr@SD">TFX</channel>
+  <channel site="programme-tv.net" site_id="gulli-29" lang="fr" xmltv_id="Gulli.fr@SD">Gulli</channel>
+  <channel site="programme-tv.net" site_id="bfmtv-25" lang="fr" xmltv_id="BFMTV.fr@SD">BFM TV</channel>
+  <channel site="programme-tv.net" site_id="cnews-30" lang="fr" xmltv_id="CNews.fr@SD">CNews</channel>
+  <channel site="programme-tv.net" site_id="lci-la-chaine-info-78" lang="fr" xmltv_id="LCI.fr@SD">LCI</channel>
+  <channel site="programme-tv.net" site_id="franceinfo-307" lang="fr" xmltv_id="Franceinfo.fr@SD">franceinfo</channel>
+  <channel site="programme-tv.net" site_id="cstar-28" lang="fr" xmltv_id="CStar.fr@SD">CSTAR</channel>
+  <channel site="programme-tv.net" site_id="t18-11532" lang="fr" xmltv_id="T18.fr@SD">T18</channel>
+  <channel site="programme-tv.net" site_id="novo19-11533" lang="fr" xmltv_id="NOVO19.fr@SD">NOVO19</channel>
+</channels>

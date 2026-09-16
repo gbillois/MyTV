@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+    <meta name="theme-color" content="#101722" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f6f8fb" media="(prefers-color-scheme: light)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MyTV">
+    <meta name="description" content="Guide TV français rapide, mobile et hors ligne.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/app.css">
+    <title>MyTV — Guide TV</title>
+  </head>
+  <body>
+    <main class="app-shell" aria-label="Guide TV MyTV">
+      <header class="app-header">
+        <div class="brand-row">
+          <div class="brand" aria-label="MyTV">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span class="brand-name">MyTV</span>
+          </div>
+          <div class="header-actions">
+            <span class="update-status" id="updateStatus" aria-live="polite">Chargement…</span>
+            <button class="icon-button" id="settingsButton" type="button" aria-label="Régler les chaînes">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"/></svg>
+            </button>
+          </div>
+        </div>
+        <nav class="guide-nav" aria-label="Navigation temporelle">
+          <button class="nav-button is-active" id="nowButton" type="button">Maintenant</button>
+          <button class="nav-button" id="tonightButton" type="button">Ce soir</button>
+          <button class="nav-button" id="todayButton" type="button">Aujourd’hui</button>
+          <label class="date-control">
+            <span class="sr-only">Choisir une date</span>
+            <select id="dateSelect" aria-label="Choisir une date"></select>
+            <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m6 8 4 4 4-4"/></svg>
+          </label>
+        </nav>
+      </header>
+
+      <section class="guide-region" id="guideRegion" aria-label="Grille des programmes">
+        <div class="loading-state" id="loadingState">
+          <div class="loading-pulse" aria-hidden="true"></div>
+          <strong>Préparation du guide</strong>
+          <span>Lecture des programmes enregistrés…</span>
+        </div>
+        <div class="epg-scroll" id="gridScroller" tabindex="0" aria-label="Programmes. Faites défiler horizontalement pour changer d’heure et verticalement pour changer de chaîne.">
+          <div class="epg-canvas" id="epgCanvas"></div>
+        </div>
+        <button class="floating-now" id="floatingNowButton" type="button" aria-label="Revenir à l’heure actuelle">
+          <span aria-hidden="true"></span> Maintenant
+        </button>
+      </section>
+    </main>
+
+    <dialog class="bottom-dialog" id="programmeDialog" aria-labelledby="programmeTitle">
+      <div class="dialog-backdrop" data-close-dialog></div>
+      <article class="bottom-sheet" id="programmeSheet">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <button class="sheet-close" type="button" data-close-dialog aria-label="Fermer">×</button>
+        <div id="programmeDetails"></div>
+      </article>
+    </dialog>
+
+    <dialog class="bottom-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+      <div class="dialog-backdrop" data-close-settings></div>
+      <section class="bottom-sheet settings-sheet">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="sheet-heading">
+          <div>
+            <p class="eyebrow">Personnalisation</p>
+            <h2 id="settingsTitle">Mes chaînes</h2>
+          </div>
+          <button class="sheet-close" type="button" data-close-settings aria-label="Fermer">×</button>
+        </div>
+        <p class="settings-intro">Affichez vos chaînes préférées et adaptez leur ordre.</p>
+        <div class="channel-settings" id="channelSettings"></div>
+        <button class="secondary-button" id="restoreChannelsButton" type="button">Rétablir l’ordre TNT</button>
+      </section>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <noscript>MyTV a besoin de JavaScript pour lire et afficher le guide des programmes.</noscript>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
