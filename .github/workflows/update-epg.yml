@@ -19,17 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer MyTV
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Récupérer IPTV-org EPG
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: iptv-org/epg
           path: .epg-upstream
           fetch-depth: 1
 
       - name: Installer Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -64,13 +64,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer la dernière version de main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: main
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: .
       - name: Déployer le guide actualisé
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
