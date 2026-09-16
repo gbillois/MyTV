@@ -25,7 +25,8 @@ MyTV utilise donc une solution entièrement GitHub-native :
 1. `.github/workflows/update-epg.yml` récupère le dépôt IPTV-org officiel ;
 2. l’outil IPTV-org génère trois jours de XMLTV pour les 19 chaînes configurées ;
 3. le résultat est validé puis enregistré dans `data/epg.xml` ;
-4. l’application charge ce fichier depuis sa propre origine GitHub Pages, sans problème CORS.
+4. l’Action redéploie Pages avec la nouvelle donnée ;
+5. l’application charge ce fichier depuis sa propre origine GitHub Pages, sans problème CORS.
 
 L’Action s’exécute toutes les huit heures et peut aussi être lancée manuellement dans l’onglet **Actions**.
 

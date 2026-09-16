@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: update-epg
@@ -53,3 +55,22 @@ jobs:
           git add data/epg.xml
           git diff --cached --quiet || git commit -m "data: actualise le guide TV"
           git push
+
+  deploy:
+    needs: update
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer la dernière version de main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Déployer le guide actualisé
+        id: deployment
+        uses: actions/deploy-pages@v4
