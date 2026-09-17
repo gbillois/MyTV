@@ -99,14 +99,18 @@ export function clampMinuteWidth(value) {
 function createProgrammeButton(programme, windowStart, windowEnd, minuteWidth, onSelect) {
   const clippedStart = Math.max(programme.start, windowStart);
   const clippedStop = Math.min(programme.stop, windowEnd);
-  const left = ((clippedStart - windowStart) / 60_000) * minuteWidth;
-  const width = Math.max(2, ((clippedStop - clippedStart) / 60_000) * minuteWidth);
+  const startMinutes = (clippedStart - windowStart) / 60_000;
+  const durationMinutes = (clippedStop - clippedStart) / 60_000;
+  const left = startMinutes * minuteWidth;
+  const width = Math.max(2, durationMinutes * minuteWidth);
   const button = document.createElement("button");
   button.type = "button";
   button.className = `programme cat-${programme.category} ${programmeSizeClass(width)}`;
   if (programme.stop < Date.now()) button.classList.add("is-past");
   button.style.left = `${left}px`;
   button.style.width = `${width}px`;
+  button.dataset.startMinutes = String(startMinutes);
+  button.dataset.durationMinutes = String(durationMinutes);
   button.setAttribute(
     "aria-label",
     `${programme.title}, de ${formatTime(programme.start)} à ${formatTime(programme.stop)}`
@@ -142,6 +146,7 @@ export function renderGuide({
   canvas.style.setProperty("--timeline-width", `${timelineWidth}px`);
   canvas.style.setProperty("--minute-width", `${minuteWidth}px`);
   canvas.style.setProperty("--channel-count", channels.length);
+  canvas.dataset.durationMinutes = String(durationMinutes);
   canvas.replaceChildren();
 
   const corner = document.createElement("div");
@@ -164,6 +169,7 @@ export function renderGuide({
     const isDayStart = formatted === "00:00";
     tickElement.className = `time-tick${formatted.endsWith(":00") ? " is-hour" : ""}${isDayStart ? " is-day-start" : ""}`;
     tickElement.style.left = `${minutes * minuteWidth}px`;
+    tickElement.dataset.minuteOffset = String(minutes);
     tickElement.innerHTML = isDayStart
       ? `<span class="day-label">${escapeHtml(formatDateLabel(tickDate, dateKey(Date.now())))}</span><span class="tick-label">00:00</span>`
       : `<span class="tick-label">${formatted}</span>`;
@@ -176,6 +182,7 @@ export function renderGuide({
     const minutes = (parisMidnight(key) - windowStart) / 60_000;
     divider.className = "day-divider";
     divider.style.left = `calc(var(--channel-width) + ${minutes * minuteWidth}px)`;
+    divider.dataset.minuteOffset = String(minutes);
     divider.setAttribute("aria-hidden", "true");
     fragment.append(divider);
   });
@@ -230,11 +237,46 @@ export function renderGuide({
     line.id = "nowLine";
     const left = (now - windowStart) / 60_000 * minuteWidth;
     line.style.left = `calc(var(--channel-width) + ${left}px)`;
+    line.dataset.minuteOffset = String((now - windowStart) / 60_000);
     fragment.append(line);
   }
 
   canvas.append(fragment);
   return { windowStart, windowEnd, timelineWidth };
+}
+
+export function rescaleGuide(canvas, minuteWidth) {
+  const durationMinutes = Number(canvas.dataset.durationMinutes);
+  if (!Number.isFinite(durationMinutes)) return 0;
+
+  const timelineWidth = durationMinutes * minuteWidth;
+  canvas.style.setProperty("--timeline-width", `${timelineWidth}px`);
+  canvas.style.setProperty("--minute-width", `${minuteWidth}px`);
+
+  canvas.querySelectorAll(".time-tick[data-minute-offset]").forEach(tick => {
+    tick.style.left = `${Number(tick.dataset.minuteOffset) * minuteWidth}px`;
+  });
+
+  canvas.querySelectorAll(".programme[data-start-minutes]").forEach(programme => {
+    const startMinutes = Number(programme.dataset.startMinutes);
+    const programmeMinutes = Number(programme.dataset.durationMinutes);
+    const width = Math.max(2, programmeMinutes * minuteWidth);
+    programme.style.left = `${startMinutes * minuteWidth}px`;
+    programme.style.width = `${width}px`;
+    programme.classList.remove("is-tiny", "is-small", "is-medium", "is-large");
+    programme.classList.add(programmeSizeClass(width));
+  });
+
+  canvas.querySelectorAll(".day-divider[data-minute-offset]").forEach(divider => {
+    divider.style.left = `calc(var(--channel-width) + ${Number(divider.dataset.minuteOffset) * minuteWidth}px)`;
+  });
+
+  const nowLine = canvas.querySelector("#nowLine[data-minute-offset]");
+  if (nowLine) {
+    nowLine.style.left = `calc(var(--channel-width) + ${Number(nowLine.dataset.minuteOffset) * minuteWidth}px)`;
+  }
+
+  return timelineWidth;
 }
 
 export function updateNowLine(canvas, windowStart, windowEnd, minuteWidth) {
@@ -243,6 +285,7 @@ export function updateNowLine(canvas, windowStart, windowEnd, minuteWidth) {
   if (!line || now < windowStart || now >= windowEnd) return;
   const left = (now - windowStart) / 60_000 * minuteWidth;
   line.style.left = `calc(var(--channel-width) + ${left}px)`;
+  line.dataset.minuteOffset = String((now - windowStart) / 60_000);
 }
 
 export function showProgrammeDetails(dialog, programme) {

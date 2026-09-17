@@ -23,6 +23,7 @@ import {
   populateDateSelector,
   renderChannelSettings,
   renderGuide,
+  rescaleGuide,
   resolveChannels,
   showProgrammeDetails,
   updateNowLine
@@ -293,9 +294,14 @@ function viewportCenterX() {
 }
 
 function clearPinchPreview() {
+  if (pinch.frame) {
+    cancelAnimationFrame(pinch.frame);
+    pinch.frame = 0;
+  }
   elements.canvas.classList.remove("is-pinching");
   elements.canvas.style.removeProperty("--pinch-origin");
   elements.canvas.style.removeProperty("--pinch-scale");
+  elements.canvas.style.removeProperty("--pinch-translate");
 }
 
 function commitZoom(nextWidth, anchorTimestamp, anchorViewportX, announce = false) {
@@ -306,17 +312,16 @@ function commitZoom(nextWidth, anchorTimestamp, anchorViewportX, announce = fals
     return;
   }
 
-  const top = elements.scroller.scrollTop;
   state.minuteWidth = width;
   saveTimelineZoom(width);
-  render();
+  rescaleGuide(elements.canvas, width);
 
   const anchorMinutes = (anchorTimestamp - state.windowStart) / 60_000;
   elements.scroller.scrollLeft = Math.max(
     0,
     getChannelWidth() + anchorMinutes * state.minuteWidth - anchorViewportX
   );
-  elements.scroller.scrollTop = top;
+  updateZoomControls();
   syncDateWithScroll();
   if (announce) showToast(`Zoom ${zoomPercent()} %`);
 }
@@ -342,7 +347,10 @@ const pinch = {
   targetWidth: DEFAULT_MINUTE_WIDTH,
   anchorTimestamp: 0,
   anchorViewportX: 0,
-  suppressClickUntil: 0
+  currentViewportX: 0,
+  scrollerLeft: 0,
+  suppressClickUntil: 0,
+  frame: 0
 };
 
 const edgeSwipe = {
@@ -371,10 +379,13 @@ function beginPinch(event) {
   pinch.startWidth = state.minuteWidth;
   pinch.targetWidth = state.minuteWidth;
   pinch.anchorViewportX = centerX;
+  pinch.currentViewportX = centerX;
+  pinch.scrollerLeft = rect.left;
   pinch.anchorTimestamp = timelineTimestampAt(centerX);
   const origin = Math.max(0, elements.scroller.scrollLeft + centerX - getChannelWidth());
   elements.canvas.style.setProperty("--pinch-origin", `${origin}px`);
   elements.canvas.style.setProperty("--pinch-scale", "1");
+  elements.canvas.style.setProperty("--pinch-translate", "0px");
   elements.canvas.classList.add("is-pinching");
   event.preventDefault();
 }
@@ -384,8 +395,19 @@ function movePinch(event) {
   pinch.targetWidth = clampMinuteWidth(
     pinch.startWidth * (touchDistance(event.touches) / pinch.startDistance)
   );
-  elements.canvas.style.setProperty("--pinch-scale", String(pinch.targetWidth / pinch.startWidth));
-  updateZoomControls(pinch.targetWidth);
+  pinch.currentViewportX = (
+    event.touches[0].clientX + event.touches[1].clientX
+  ) / 2 - pinch.scrollerLeft;
+  if (!pinch.frame) {
+    pinch.frame = requestAnimationFrame(() => {
+      pinch.frame = 0;
+      elements.canvas.style.setProperty("--pinch-scale", String(pinch.targetWidth / pinch.startWidth));
+      elements.canvas.style.setProperty(
+        "--pinch-translate",
+        `${pinch.currentViewportX - pinch.anchorViewportX}px`
+      );
+    });
+  }
   event.preventDefault();
 }
 
@@ -396,7 +418,7 @@ function endPinch(event) {
   commitZoom(
     pinch.targetWidth,
     pinch.anchorTimestamp,
-    pinch.anchorViewportX,
+    pinch.currentViewportX,
     Math.abs(pinch.targetWidth - pinch.startWidth) >= 0.05
   );
 }
